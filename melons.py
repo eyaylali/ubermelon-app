@@ -33,7 +33,17 @@ def shopping_cart():
     """TODO: Display the contents of the shopping cart. The shopping cart is a
     list held in the session that contains all the melons to be added. Check
     accompanying screenshots for details."""
-    return render_template("cart.html")
+    # if "cart" in session:
+
+    melon_list= []
+    for id, qty in session["cart"].items():
+        melon = model.get_melon_by_id(id)
+        melon_list.append((melon, qty))
+
+    print melon_list
+
+    return render_template("cart.html", melon_list= melon_list)
+
 
 @app.route("/add_to_cart/<int:id>")
 def add_to_cart(id):
@@ -44,7 +54,35 @@ def add_to_cart(id):
     shopping cart page, while displaying the message
     "Successfully added to cart" """
 
-    return "Oops! This needs to be implemented!"
+    # cart_list =[]
+    # if "cart" in session:
+    #     cart_list.append(id)
+    #     flash("You have successfully added a melon to your cart.")
+    
+    # else:
+    #     session["cart"]= cart_list
+    #     cart_list.append(id)
+    #     flash("You have succesffuly added a melon to your cart.")
+
+
+    if "cart" in session:
+        if str(id) in session["cart"]: 
+            print "I'm in my if statement!"
+            qty =session["cart"][str(id)]
+            qty = qty + 1
+            session["cart"][str(id)] = qty
+            flash("You have successfully added a melon to your cart!")
+            
+        else:
+            session["cart"].update({id:1})
+            flash("You have successfully added a melon to your cart!")
+            print "session is", session
+    else:
+        session["cart"]={id:1}
+        flash("You have successfully added a melon to your cart!")
+        print "This is the else! It didn't go to the IF!"
+    
+    return shopping_cart()
 
 
 @app.route("/login", methods=["GET"])
