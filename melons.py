@@ -82,7 +82,14 @@ def add_to_cart(id):
 
 @app.route("/login", methods=["GET"])
 def show_login():
-    return render_template("login.html")
+
+    if "user" in session:
+        flash("You're already logged in!")
+        ###get their name###
+        ###create the text "logout"
+        ###pass text to base template to change button text to "logout"
+    else:
+        return render_template("login.html")
 
 
 @app.route("/login", methods=["POST"])
@@ -93,12 +100,14 @@ def process_login():
     email= request.form.get("email")
     customer = model.get_customer_by_email(email)
 
-    session["user"]={"name":customer.name,"email":customer.email}
-    print session
-
-    flash("Login successful!")
-    return redirect("/melons")
-
+    if customer == None:
+        flash("No user with this email exists!")
+    else:
+        session["user"]={"name":customer.name,"email":customer.email}
+        display_name = session["user"]["name"]
+        g.display= "Hi",display_name
+        flash("Login successful!")
+        return redirect("/melons")
 
 @app.route("/checkout")
 def checkout():

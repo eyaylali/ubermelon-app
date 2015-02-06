@@ -91,5 +91,4 @@ def get_customer_by_email(email):
     return None
 
   customer = Customer(row[0], row[1])
-  print type(row)
   return customer
