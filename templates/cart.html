@@ -5,7 +5,12 @@
 
     <tr><th>Melon Name</th><th>Quantity</th><th>Price</th><th>Total</th></tr>
     {%for melon,qty in melon_list%}
-    <tr><td>{{melon.common_name}}</td><td>{{qty}}</td><td>{{melon.price_str()}}</td><td>${{sub_total_dictionary[melon.common_name]}}</td></tr>
+    <tr><td>{{melon.common_name}}</td><td>
+        <form action="/update_cart">
+            <input type="text" name= "quantity" size="2" maxlength="2" value="{{qty}}"><input type="submit" value="Update"> 
+        </form>
+    </td>
+    <td>{{melon.price_str()}}</td><td>${{sub_total_dictionary[melon.common_name]}}</td></tr>
    {%endfor%}
 
 </table>

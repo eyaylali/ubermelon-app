@@ -37,6 +37,10 @@ def shopping_cart():
     if "cart" not in session:
         session["cart"]={}
 
+    if g.new_qty:
+        
+        sub_total = melon.price * int(g.new_qty)    
+
     melon_list= []
     for id, qty in session["cart"].items():
         melon = model.get_melon_by_id(id)
@@ -56,6 +60,15 @@ def shopping_cart():
         
     return render_template("cart.html", melon_list= melon_list, sum = sum, sub_total_dictionary=sub_total_dictionary)
  
+def calc():
+    pass
+
+
+@app.route("/update_cart")
+def update_cart():
+
+    g.new_qty = request.args.get("quantity")
+    return shopping_cart()
 
 @app.route("/add_to_cart/<int:id>")
 def add_to_cart(id):
@@ -86,9 +99,6 @@ def show_login():
     if "user" in session:
         flash("You're already logged in!")
         return redirect ("/melons")
-        ###get their name###
-        ###create the text "logout"
-        ###pass text to base template to change button text to "logout"
     else:
         return render_template("login.html")
 
@@ -99,17 +109,21 @@ def process_login():
     dictionary, look up the user, and store them in the session."""
 
     email= request.form.get("email")
+    password = request.form.get("password")
     customer = model.get_customer_by_email(email)
 
     if customer == None:
         flash("No user with this email exists!")
         return render_template("login.html")
     else:
-        session["user"]={"name":customer.name,"email":customer.email}
-        display_name = session["user"]["name"]
-        g.display = display_name
-        flash("Login successful!")
-        return redirect("/melons")
+        if password != customer.password:
+            flash("Incorrect password. Please try again.")
+            return render_template("login.html")
+        else:
+            session["user"]={"name":customer.name,"email":customer.email, "password":customer.password}
+            g.display = session["user"]["name"]
+            flash("Login successful!")
+            return redirect("/melons")
 
 
 @app.route("/checkout")
