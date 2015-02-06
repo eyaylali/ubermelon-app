@@ -1,4 +1,4 @@
-from flask import Flask, request, session, render_template, g, redirect, url_for, flash
+from flask import Flask, request, g, session, render_template, g, redirect, url_for, flash
 import model
 import jinja2
 import os
@@ -85,6 +85,7 @@ def show_login():
 
     if "user" in session:
         flash("You're already logged in!")
+        return redirect ("/melons")
         ###get their name###
         ###create the text "logout"
         ###pass text to base template to change button text to "logout"
@@ -102,12 +103,14 @@ def process_login():
 
     if customer == None:
         flash("No user with this email exists!")
+        return render_template("login.html")
     else:
         session["user"]={"name":customer.name,"email":customer.email}
         display_name = session["user"]["name"]
-        g.display= "Hi",display_name
+        g.display = display_name
         flash("Login successful!")
         return redirect("/melons")
+
 
 @app.route("/checkout")
 def checkout():
