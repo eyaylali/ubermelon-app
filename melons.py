@@ -33,17 +33,29 @@ def shopping_cart():
     """TODO: Display the contents of the shopping cart. The shopping cart is a
     list held in the session that contains all the melons to be added. Check
     accompanying screenshots for details."""
-    # if "cart" in session:
+
+    if "cart" not in session:
+        session["cart"]={}
 
     melon_list= []
     for id, qty in session["cart"].items():
         melon = model.get_melon_by_id(id)
         melon_list.append((melon, qty))
 
-    print melon_list
+    sum = 0
+    for melon, qty in melon_list:
+        sub_total = melon.price * qty
+        sum = (sum + sub_total)
+    sum = "%.2f" % sum
 
-    return render_template("cart.html", melon_list= melon_list)
-
+    sub_total_dictionary={}
+    for melon, qty in melon_list:
+        sub_total = melon.price * qty
+        sub_total = "%.2f" % sub_total
+        sub_total_dictionary[melon.common_name]= sub_total
+        
+    return render_template("cart.html", melon_list= melon_list, sum = sum, sub_total_dictionary=sub_total_dictionary)
+ 
 
 @app.route("/add_to_cart/<int:id>")
 def add_to_cart(id):
@@ -54,35 +66,18 @@ def add_to_cart(id):
     shopping cart page, while displaying the message
     "Successfully added to cart" """
 
-    # cart_list =[]
-    # if "cart" in session:
-    #     cart_list.append(id)
-    #     flash("You have successfully added a melon to your cart.")
-    
-    # else:
-    #     session["cart"]= cart_list
-    #     cart_list.append(id)
-    #     flash("You have succesffuly added a melon to your cart.")
-
-
     if "cart" in session:
         if str(id) in session["cart"]: 
-            print "I'm in my if statement!"
             qty =session["cart"][str(id)]
             qty = qty + 1
             session["cart"][str(id)] = qty
-            flash("You have successfully added a melon to your cart!")
-            
         else:
             session["cart"].update({id:1})
-            flash("You have successfully added a melon to your cart!")
-            print "session is", session
     else:
         session["cart"]={id:1}
-        flash("You have successfully added a melon to your cart!")
-        print "This is the else! It didn't go to the IF!"
-    
-    return shopping_cart()
+
+    flash("You have successfully added a melon to your cart!")
+    return redirect("/cart")
 
 
 @app.route("/login", methods=["GET"])
@@ -94,7 +89,15 @@ def show_login():
 def process_login():
     """TODO: Receive the user's login credentials located in the 'request.form'
     dictionary, look up the user, and store them in the session."""
-    return "Oops! This needs to be implemented"
+
+    email= request.form.get("email")
+    customer = model.get_customer_by_email(email)
+
+    session["user"]={"name":customer.name,"email":customer.email}
+    print session
+
+    flash("Login successful!")
+    return redirect("/melons")
 
 
 @app.route("/checkout")
