@@ -1,4 +1,4 @@
-from flask import Flask, request, g, session, render_template, g, redirect, url_for, flash
+from flask import Flask, request, session, render_template, g, redirect, url_for, flash
 import model
 import jinja2
 import os
@@ -37,38 +37,30 @@ def shopping_cart():
     if "cart" not in session:
         session["cart"]={}
 
-    if g.new_qty:
-        
-        sub_total = melon.price * int(g.new_qty)    
+    new_qty = request.args.get('quantity', None)
 
+    if new_qty:
+        session["cart"][request.args.get("id")] = int(new_qty)
+        
     melon_list= []
     for id, qty in session["cart"].items():
         melon = model.get_melon_by_id(id)
-        melon_list.append((melon, qty))
+        melon_list.append((id, melon, qty))
 
     sum = 0
-    for melon, qty in melon_list:
+    for id, melon, qty in melon_list:
         sub_total = melon.price * qty
         sum = (sum + sub_total)
     sum = "%.2f" % sum
 
     sub_total_dictionary={}
-    for melon, qty in melon_list:
+    for id, melon, qty in melon_list:
         sub_total = melon.price * qty
         sub_total = "%.2f" % sub_total
         sub_total_dictionary[melon.common_name]= sub_total
         
     return render_template("cart.html", melon_list= melon_list, sum = sum, sub_total_dictionary=sub_total_dictionary)
  
-def calc():
-    pass
-
-
-@app.route("/update_cart")
-def update_cart():
-
-    g.new_qty = request.args.get("quantity")
-    return shopping_cart()
 
 @app.route("/add_to_cart/<int:id>")
 def add_to_cart(id):
